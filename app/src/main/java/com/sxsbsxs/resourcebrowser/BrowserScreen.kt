@@ -26,6 +26,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -190,7 +191,7 @@ fun BrowserScreen() {
                 }
             }
         }
-        if (active != null) AndroidView(factory = { active.view }, modifier = Modifier.weight(1f).fillMaxWidth())
+        if (active != null) key(active.id) { AndroidView(factory = { active.view }, modifier = Modifier.weight(1f).fillMaxWidth()) }
         else Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) { Text("没有打开的标签页") }
         Divider(color = Color(0xFFE5E7EB), thickness = 0.7.dp)
         Row(Modifier.fillMaxWidth().height(58.dp).background(Color(0xFFF8F9FA)).padding(horizontal = 8.dp),
@@ -215,7 +216,7 @@ fun BrowserScreen() {
                                 Text(tab.url, style = MaterialTheme.typography.bodySmall, maxLines = 1)
                             }
                             Text("×", Modifier.clickable {
-                                tab.view.stopLoading(); tab.view.destroy(); tabs.remove(tab)
+                                tab.view.stopLoading(); tabs.remove(tab); tab.view.post { tab.view.destroy() }
                                 if (activeId == tab.id) {
                                     val next = tabs.lastOrNull()
                                     if (next == null) addTab() else { activeId = next.id; address = next.url }
