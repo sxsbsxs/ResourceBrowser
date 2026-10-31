@@ -10,6 +10,7 @@
 - [x] 多标签页：新建、切换、关闭，每个标签独立 WebView
 - [x] 根据请求 URL 扩展名发现 MP4、WebM、M3U8、MP3、PDF、MPD 等资源
 - [x] 媒体资源列表查看、清空及点击打开
+- [x] 页面内资源出现后显示悬浮快捷入口
 - [x] 书签添加和查看
 - [x] 浏览历史查看和清空
 - [x] WebView 下载监听，通过 Android DownloadManager 创建下载任务
