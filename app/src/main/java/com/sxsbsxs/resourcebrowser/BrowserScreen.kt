@@ -285,9 +285,11 @@ fun BrowserScreen() {
                     }
                 },
                 confirmButton = { TextButton(onClick = { panel = "" }) { Text("关闭") } },
-                dismissButton = if (!isBookmarks) ({ TextButton(onClick = {
-                    history = emptyList(); prefs.edit().remove("history").apply()
-                }) { Text("清空历史") } }) else null
+                dismissButton = {
+                    if (!isBookmarks) TextButton(onClick = {
+                        history = emptyList(); prefs.edit().remove("history").apply()
+                    }) { Text("清空历史") }
+                }
             )
         }
         "resources" -> AlertDialog(
