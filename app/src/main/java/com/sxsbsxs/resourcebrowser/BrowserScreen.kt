@@ -9,10 +9,12 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,9 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,9 +37,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,16 +49,15 @@ import androidx.compose.ui.viewinterop.AndroidView
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun BrowserScreen() {
+    val context = LocalContext.current
     var address by remember { mutableStateOf("https://www.google.com") }
-    var displayedUrl by remember { mutableStateOf("") }
-    var pageTitle by remember { mutableStateOf("新标签页") }
     var progress by remember { mutableFloatStateOf(0f) }
     var loading by remember { mutableStateOf(false) }
     var webView by remember { mutableStateOf<WebView?>(null) }
-    var editing by remember { mutableStateOf(false) }
+    var pageTitle by remember { mutableStateOf("新标签页") }
 
-    val browserView = remember {
-        WebView(androidx.compose.ui.platform.LocalContext.current).apply {
+    val browserView = remember(context) {
+        WebView(context).apply {
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             settings.allowFileAccess = false
@@ -68,18 +68,14 @@ fun BrowserScreen() {
                 override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
                     loading = true
                     progress = 0f
-                    if (!editing && !url.isNullOrBlank()) address = url
-                    displayedUrl = url.orEmpty()
+                    if (!url.isNullOrBlank()) address = url
                 }
 
                 override fun onPageFinished(view: WebView, url: String?) {
                     loading = false
                     progress = 1f
                     pageTitle = view.title?.takeIf { it.isNotBlank() } ?: "新标签页"
-                    if (!url.isNullOrBlank()) {
-                        displayedUrl = url
-                        if (!editing) address = url
-                    }
+                    if (!url.isNullOrBlank()) address = url
                 }
 
                 override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
@@ -99,7 +95,7 @@ fun BrowserScreen() {
         }
     }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(browserView) {
         webView = browserView
         if (browserView.url == null) browserView.loadUrl("https://www.google.com")
     }
@@ -115,7 +111,6 @@ fun BrowserScreen() {
             input.contains(" ") || !input.contains(".") -> "https://www.google.com/search?q=" + Uri.encode(input)
             else -> "https://$input"
         }
-        editing = false
         address = target
         browserView.loadUrl(target)
     }
@@ -144,12 +139,11 @@ fun BrowserScreen() {
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
-                    Text("×", fontSize = 22.sp, color = Color(0xFF5F6368))
                 }
                 if (loading) {
-                    androidx.compose.foundation.layout.Spacer(Modifier.height(5.dp))
-                    androidx.compose.foundation.layout.Box(Modifier.fillMaxWidth().height(2.dp)) {
-                        androidx.compose.foundation.layout.Box(
+                    Spacer(Modifier.height(5.dp))
+                    Box(Modifier.fillMaxWidth().height(2.dp)) {
+                        Box(
                             Modifier.fillMaxWidth(progress.coerceIn(0f, 1f)).height(2.dp)
                                 .background(Color(0xFF4285F4))
                         )
@@ -182,15 +176,13 @@ fun BrowserScreen() {
 
 @Composable
 private fun BrowserAction(symbol: String, label: String, enabled: Boolean = true, onClick: () -> Unit) {
-    androidx.compose.foundation.clickable(enabled = enabled, onClick = onClick).let { clickModifier ->
-        Column(
-            modifier = Modifier.padding(horizontal = 5.dp, vertical = 3.dp)
-                .then(clickModifier),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(symbol, fontSize = 22.sp, color = if (enabled) Color(0xFF3C4043) else Color(0xFFBDC1C6))
-            Text(label, fontSize = 10.sp, color = Color(0xFF5F6368))
-        }
+    Column(
+        modifier = Modifier.padding(horizontal = 5.dp, vertical = 3.dp)
+            .clickable(enabled = enabled, onClick = onClick),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(symbol, fontSize = 22.sp, color = if (enabled) Color(0xFF3C4043) else Color(0xFFBDC1C6))
+        Text(label, fontSize = 10.sp, color = Color(0xFF5F6368))
     }
 }
