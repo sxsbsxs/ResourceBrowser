@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -164,7 +165,8 @@ fun BrowserScreen() {
     LaunchedEffect(Unit) { if (tabs.isEmpty()) addTab() }
     BackHandler(enabled = active?.view?.canGoBack() == true) { active?.view?.goBack() }
 
-    Column(Modifier.fillMaxSize().background(Color(0xFFF8F9FA))) {
+    Box(Modifier.fillMaxSize()) {
+      Column(Modifier.fillMaxSize().background(Color(0xFFF8F9FA))) {
         Surface(color = Color(0xFFF8F9FA), shadowElevation = 1.dp) {
             Column(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)) {
                 Row(
@@ -202,6 +204,19 @@ fun BrowserScreen() {
             Action("▢", tabs.size.toString()) { panel = "tabs" }
             Action("⋮", "菜单") { panel = "menu" }
         }
+      }
+      if (resources.isNotEmpty()) {
+          Surface(
+              modifier = Modifier.align(Alignment.BottomEnd).padding(end = 16.dp, bottom = 76.dp)
+                  .clickable { panel = "resources" },
+              shape = CircleShape,
+              color = Color(0xFF1A73E8),
+              shadowElevation = 6.dp
+          ) {
+              Text("资源 " + resources.size, modifier = Modifier.padding(horizontal = 16.dp, vertical = 11.dp),
+                  color = Color.White, style = MaterialTheme.typography.labelLarge)
+          }
+      }
     }
 
     when (panel) {
